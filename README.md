@@ -5,8 +5,8 @@ Linh's repo for BIOL 701, Fall 2026
 
 
 # Assignments
-## Unit 1
-- Added to be my collaborators 
+## Unit 1 (Unit01_Git)
+- Added Ceren to be my collaborator in this repo (for Unit01_Git folder)
 
 
 
