@@ -1,0 +1,4 @@
+# ignore working files
+*.RData
+*.Rhistory
+Reuman*
