@@ -9,7 +9,7 @@ Linh's repo for BIOL 701, Fall 2026
 ## Unit 3 (Unit03_CART)
 ### Sep 3: 
 - Working on breast cancer database: https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data?resource=download, but the data was unzipped as "data.csv"
-- Also, I downloaded https://archive.ics.uci.edu/dataset/995/apistox and stored as apistox_data.csv 
+- Also, I downloaded https://archive.ics.uci.edu/dataset/1/abalone and stored as abalone_data.csv 
 
 
 
