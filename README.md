@@ -11,5 +11,12 @@ Linh's repo for BIOL 701, Fall 2026
 - Working on breast cancer database: https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data?resource=download, but the data was unzipped as "data.csv"
 - Also, I downloaded https://archive.ics.uci.edu/dataset/1/abalone and stored as abalone_data.csv 
 
-
-
+In this unit: 
+- fit pre-pruned tree and full tree in the training set
+- cross validation, in both mannual way and less-mannual way
+- pruning the tree before fitting
+- bagging
+- random forest
+- boosting 
+- along with validation after each steps 
+- also test on test data 
