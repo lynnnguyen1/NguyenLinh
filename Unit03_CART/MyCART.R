@@ -7,7 +7,10 @@ library(rpart.plot)
 library(randomForest)
 # install.packages("ipred")
 library(ipred)
-library(adabag) # boosting packagge
+# install.packages("adabag")
+library(adabag) # boosting package
+# install.packages("xgboost")
+library(xgboost)
 
 abalone <- read.csv("abalone_data.csv")
 
@@ -66,6 +69,10 @@ abalone$sex <- as.factor(abalone$sex)
 permutation_abalone <- abalone[sample(x=dim(abalone)[1], size=dim(abalone)[1],replace=FALSE),]
 train_set <- permutation_abalone[1:round(0.75*dim(abalone)[1]),]
 test_set <- permutation_abalone[(round(0.75*dim(abalone)[1])+1):dim(abalone)[1],]
+
+# just in case
+train_set$sex <- factor(train_set$sex, levels = c("F", "I", "M"))
+test_set$sex <- factor(test_set$sex, levels = c("F", "I", "M"))
 
 # check dim of new sets
 dim(train_set)
@@ -154,9 +161,9 @@ mean(err_fullmod)
 mean(err_prunemod) 
 
 # > mean(err_fullmod)
-# [1] 0.5153304
+# [1] 0.505125
 # > mean(err_prunemod) 
-# [1] 0.4664842
+# [1] 0.4693616
 
 ## comment - 
 # pre-pruned model is cart_model_sep8_predict (or prunemod), whereas full model is cart_model_sep8_full (or fullmod)
@@ -164,11 +171,11 @@ mean(err_prunemod)
 
 # comparing out-of-sample err and within-sampel err of models 
 # for full: 
-# out: 0.5153304
+# out: 0.505125
 # within: 0 (no error)
 
 # for pruned model:
-# out: 0.4664842
+# out: 0.4693616
 # within: 0.4460409
 
 ## Linh's comment:
@@ -187,7 +194,7 @@ plotcp(cart_model_sep8_full)
 dev.off()
 
 # let me check the pruned model 
-printcp(cart_model_sep8)
+# printcp(cart_model_sep8)
 # plot cp 
 png(file="cp_prunemodel.png")
 plotcp(cart_model_sep8)
@@ -199,7 +206,7 @@ colnames(cart_model_sep8_full$cptable)
 # we want to check the xerror => column 4, and whatever row with first lowest xerror value so far
 
 cart_model_sep8_full$cptable[4,4] # note 4
-cart_model_sep8$cptable[3,4] # best one is at node number 3 (so row 3) 
+# cart_model_sep8$cptable[3,4] # best one is at node number 3 (so row 3) 
 
 # output
 # cart_model_sep8_full$cptable[4,1] 
@@ -236,12 +243,9 @@ for (currentgroup in 1:numgp)
   err_newmod[currentgroup]<-sum(pred_cart_model_sep17_full_checkerr!=train_set$sex[gp==currentgroup])/sum(gp==currentgroup)
 }
 mean(err_newmod) 
+# 0.4623461
 
 # so we got this output - 
-# mean(err_newmod) 
-# [1] 0.4447783
-# err of full model err, out sample= 0.5153304
-# err of pruned model, out sample=0.4664842
 # so our new model with specific cp works better than pruned (and obviously full)
 # difference between pruned and new model is 0.4664842 - 0.4447783 = 0.0217059
 
@@ -251,7 +255,7 @@ bagging_mod <- ipred::bagging(sex~.,data=train_set,nbagg=500,coob=TRUE,method="c
   control=rpart.control(cp=0,minsplit=1,xval=0))
 
 # out of bag evaluation for misclassificatin 
-print(bagging_mod) # err = 0.4585
+print(bagging_mod) # err = 0.4639208
 
 # prediction 
 b_pred<-predict(bagging_mod,type="class") 
@@ -278,13 +282,10 @@ for (currentgroup in 1:numgp)
 mean(err_bagging) 
 
 # mean(err_bagging) 
-# [1] 0.4629658
+# [1] 0.4626615
 
 ### Linh's comment
 ## compare w previous results
-# err of full model err, out sample= 0.5153304
-# err of pruned model, out sample=0.4664842
-# err of new model, out sample = 0.4447783
 # turns out bagging did better than full and pruned but not as well as the hand-selected model (new model)
 
 ## random forest
@@ -301,15 +302,195 @@ rf_mod
 #                      Number of trees: 1000
 # No. of variables tried at each split: 2
 
-#         OOB estimate of  error rate: 44.7%
+#   OOB estimate of  error rate: 46.1%
 # Confusion matrix:
 #     F   I   M class.error
-# F 403 119 463   0.5908629
-# I  90 766 148   0.2370518
-# M 376 204 563   0.5074366
+# F 378 115 492   0.6162437
+# I  88 755 144   0.2350557
+# M 413 192 555   0.5215517
 
 ## plot that out 
 png("rf_model_plt.png")
 plot(rf_mod) 
 dev.off()
 
+# cross validation as before
+err_rf <- NA
+# also with 10 groups as before 
+for (currentgroup in 1:numgp)
+{
+  # full model - train on 9 groups, left 1 group out
+  sub_rf <- randomForest::randomForest(sex~.,data=train_set[gp!=currentgroup,],ntree=1000)
+
+  #get predictions for the left out group and get error rates
+  pred_rf <- predict(sub_rf,newdata=train_set[gp==currentgroup,],type="class")
+  # err rate
+  err_rf[currentgroup]<-sum(pred_rf!=train_set$sex[gp==currentgroup])/sum(gp==currentgroup)
+}
+mean(err_rf) 
+
+# > mean(err_rf) 
+# [1] 0.4502096
+
+### Linh's comment
+## compare w previous results
+# turns out random forest did better than bagging but not as well as the hand-selected model (new model)
+
+# give ada boost a try
+library(adabag)
+ada_mod <- adabag::boosting(sex~.,data=train_set,control=rpart.control(maxdepth=2))
+ada_pred<-predict(ada_mod,train_set[,2:dim(train_set)[2]])$class #note the prediction output gives 
+#more detail, including information on certainty
+sum(ada_pred!=train_set$sex)/dim(train_set)[1]
+
+# sum(ada_pred!=train_set$sex)/dim(train_set)[1]
+# [1] 0.4610473
+
+ada_mod$importance #gives the relative importance of the different variables to only get them for the final model 
+
+#       diameter         height         length          rings   shell_weight 
+#      0.0000000      0.1838576      0.0000000      8.2190912      0.0310227 
+# shucked_weight viscera_weight   whole_weight 
+#      0.1024934     55.9324384     35.5310967
+
+## cross validation on adaptive 
+err_ada <- NA
+# also with 10 groups as before 
+for (currentgroup in 1:numgp)
+{
+  # full model - train on 9 groups, left 1 group out
+  sub_ada <- adabag::boosting(sex~.,data=train_set[gp!=currentgroup,],control=rpart.control(maxdepth=2))
+
+  #get predictions for the left out group and get error rates
+  pred_ada <- predict(sub_ada,newdata=train_set[gp==currentgroup,],type="class")$class
+  # err rate
+  err_ada[currentgroup]<-sum(pred_ada!=train_set$sex[gp==currentgroup])/sum(gp==currentgroup)
+}
+mean(err_ada) 
+
+#mean(err_ada) 
+# [1] 0.4741529
+
+# print("all results so far")
+# mean(err_fullmod)
+# mean(err_prunemod) 
+# mean(err_newmod)
+# mean(err_bagging) 
+# mean(err_rf) 
+# mean(err_ada)
+
+# [1] "all results so far"
+# [1] 0.505125
+# [1] 0.4693616
+# [1] 0.4623461
+# [1] 0.4626615
+# [1] 0.4502096
+# [1] 0.4677622
+
+## Linh's interpretation: so it looks like random forest still out perform adaptive model
+## so far it's random forest that the best model 
+# last model of the assignment - gradient boosting
+
+# wrap into matrix of xgboost
+x_matrix<-as.matrix(train_set[,2:(dim(train_set)[2])])
+y_matrix<-as.integer(train_set[,1])-1
+dtrain<-xgb.DMatrix(data=x_matrix,label=y_matrix)
+
+m_xgb<-xgb.train(data=dtrain,
+           nrounds=500,
+           params=list(objective="multi:softprob", # cuz i have 3 classes
+                       max_depth=2,
+                       eval_metric = "mlogloss",
+                       num_class=3, 
+                       learning_rate=.05,
+                       nthread=2),
+           verbose=0)
+           
+#get error rate on the validation data
+pred_xgb<-predict(m_xgb,x_matrix)
+
+cv_predictions <- rep(NA, nrow(x_matrix)) # save a confusion matrix too
+err_xgb <- rep(NA, numgp)
+for (currentgroup in 1:numgp) {  
+  #fit the models on all of the data excluding one group
+  dtrain_subset<-xgb.DMatrix(data=x_matrix[gp!=currentgroup,],label=y_matrix[gp!=currentgroup])
+  
+  # copied the previous one
+  m_xgb_s <-xgb.train(data=dtrain_subset,
+           nrounds=500,
+           params=list(objective="multi:softprob", # cuz i have 3 classes
+                       max_depth=2,
+                       eval_metric = "mlogloss",
+                       num_class=3, 
+                       learning_rate=.05,
+                       nthread=2),
+           verbose=0)
+  #get predictions for the left out group and get error rates
+  pred_xgb_s<-predict(m_xgb_s,x_matrix[gp==currentgroup,])
+  # 3 column matrix to check prob / performance - cant be 0.5 cuz not sure about the balance of variables in the train / test set
+  pred_xgb_s <- matrix(pred_xgb_s, ncol = 3,byrow = TRUE)
+  # Select class with highest probability
+  predictions_s <- max.col(pred_xgb_s) - 1
+  cv_predictions[gp == currentgroup] <- predictions_s
+  # err rate
+  err_xgb[currentgroup] <- mean(predictions_s != y_matrix[gp == currentgroup])
+  }
+
+mean(err_xgb)
+
+# confusion matrix
+table(
+  Actual = y_matrix,
+  Predicted = cv_predictions
+)
+
+#         Predicted
+# Actual   0   1   2
+#      0 328 308 349
+#      1 298 336 370
+#      2 396 347 400
+
+# get the variable importance of xgboost
+importance_matrix<-xgb.importance(model=m_xgb)
+importance_matrix
+
+#  Feature            Gain      Cover  Frequency
+#            <char>      <num>      <num>      <num>
+# 1: viscera_weight 0.38572997 0.17182468 0.15074456
+# 2:   whole_weight 0.18149562 0.13150661 0.12439863
+# 3:          rings 0.12590225 0.06637282 0.09026346
+# 4:         length 0.08210057 0.16566778 0.17273769
+# 5:   shell_weight 0.08139277 0.11086795 0.12050401
+# 6:         height 0.05831721 0.09971474 0.10011455
+# 7: shucked_weight 0.05238929 0.16518519 0.13906071
+# 8:       diameter 0.03267232 0.08886023 0.10217640
+
+## okay come back to our all 7 models
+
+print("-----")
+print("all err rates of 7 models")
+mean(err_fullmod)
+mean(err_prunemod) 
+mean(err_newmod)
+mean(err_bagging) 
+mean(err_rf) 
+mean(err_ada)
+mean(err_xgb)
+
+# [1] "all results so far"
+# [1] 0.505125
+# [1] 0.4693616
+# [1] 0.4623461
+# [1] 0.4626615
+# [1] 0.4502096
+# [1] 0.4677622
+# [1] 0.6596508
+
+# so the best model is random forest with lowest err rate
+
+# use random forest on test set 
+print("random forest on test set")
+testpred_rf<-predict(rf_mod,test_set[,2:9],type="class")
+sum(testpred_rf!=test_set$sex)/dim(test_set)[1]
+
+# reached the error rate of of 0.4281609
