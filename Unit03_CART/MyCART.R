@@ -291,7 +291,7 @@ mean(err_bagging)
 ## random forest
 
 # random forest with 1000 trees
-rf_mod <-randomForest::randomForest(sex~.,data=train_set,ntree=1000)
+rf_mod <-randomForest::randomForest(sex~.,data=train_set,ntree=1000,importance=TRUE)
 
 # let's get our oob err 
 rf_mod
@@ -313,6 +313,11 @@ rf_mod
 png("rf_model_plt.png")
 plot(rf_mod) 
 dev.off()
+
+# get the parameter that is the most important in rf_mod
+
+rf_importance <- randomForest::importance(rf_mod, type =1)
+rf_importance
 
 # cross validation as before
 err_rf <- NA
