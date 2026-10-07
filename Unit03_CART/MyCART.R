@@ -1,3 +1,5 @@
+#CLAUDE>> Lines tagged "#CLAUDE>>" were written by Claude (an AI); lines tagged
+#CLAUDE>> "#DAN>>" were written by Dan. These are learning suggestions only.
 ## to explore abalone dataset
 library(ggplot2)
 library(dplyr)
@@ -11,6 +13,9 @@ library(ipred)
 library(adabag) # boosting package
 # install.packages("xgboost")
 library(xgboost)
+
+# DAN>> Reading all these in now means functions from earlier packages can be
+# DAN>> masked by functions from later packages. Use the :: opreator to prevent that.
 
 abalone <- read.csv("abalone_data.csv")
 
@@ -45,6 +50,8 @@ round(abalone_corr_pairwise, 2)
 # reshape
 abalone_corr_longshape <- as.data.frame(as.table(abalone_corr_pairwise))
 colnames(abalone_corr_longshape) <- c("Var1", "Var2", "Correlation")
+
+# DAN>> Very good idea to examine your data first!
 
 # draw
 pairwise_heatmap_abalone <- ggplot(abalone_corr_longshape, aes(x = Var1, y = Var2, fill = Correlation)) +
@@ -178,6 +185,8 @@ mean(err_prunemod)
 # out: 0.4693616
 # within: 0.4460409
 
+#CLAUDE>> NOTE: precisely, it is the full MODEL that overfits; within-sample error just cannot detect it.
+#CLAUDE>> Day 3's fifth question is still open: is this the same pattern as the breast-cancer data in class?
 ## Linh's comment:
 # So prune model performed worse than full one when it was within sample validation (higher err rate)
 # Prune model performs better than full tree for out of sample validation
@@ -203,7 +212,13 @@ dev.off()
 # choose the good optimal point - 
 colnames(cart_model_sep8_full$cptable)
 # [1] "CP"        "nsplit"    "rel error" "xerror"    "xstd"
+#CLAUDE>> THINK: the lowest-xerror row is not the 1-SE choice. Add that row's xstd to its xerror to get the
+#CLAUDE>> threshold, then take the row with the FEWEST splits whose xerror is below it. Which row is that?
 # we want to check the xerror => column 4, and whatever row with first lowest xerror value so far
+
+# DAN>> What Claude describes is the convention, and what I taught, so you should try 
+# DAN>> to do it, but it is only a convention. One could argue to take the lowest 
+# DAN>> CV as well. 
 
 cart_model_sep8_full$cptable[4,4] # note 4
 # cart_model_sep8$cptable[3,4] # best one is at node number 3 (so row 3) 
@@ -217,6 +232,7 @@ cart_model_sep8_full$cptable[4,4] # note 4
 # Linh's interpretation
 # turns out the xerror at the first lowest xerror of full model is smaller than that of the prune model
 # => go with full model at node 4,4
+# DAN>> I like how you are inserting these interpretations. 
 
 # new full model, with that split at 4,4
 cart_model_sep8_full <- rpart(sex~.,data=train_set,method="class", 
@@ -253,6 +269,7 @@ mean(err_newmod)
 # baggin model to classify sex with out of the bag evaluaiton and bootstrapping 500 bags 
 bagging_mod <- ipred::bagging(sex~.,data=train_set,nbagg=500,coob=TRUE,method="class",
   control=rpart.control(cp=0,minsplit=1,xval=0))
+# DAN>> Correct use of full trees as the base learners here
 
 # out of bag evaluation for misclassificatin 
 print(bagging_mod) # err = 0.4639208
@@ -261,9 +278,16 @@ print(bagging_mod) # err = 0.4639208
 b_pred<-predict(bagging_mod,type="class") 
 sum(b_pred!=train_set$sex)/dim(train_set)[1] # 0.4594508
 
+#CLAUDE>> NOTE: good observation. There is no set.seed() before bagging(), so the bootstrap samples (and the
+#CLAUDE>> OOB error) change each run. predict(bagging_mod) with no newdata returns the OOB predictions.
 ## Linh's comment: 
 # actually oob and prediction are slightly different 
 # also I ran several times and sum b_pred also changed a little bit after each trial 
+# DAN>> There are theorems saying the oob and x-val errors are supposed to be the same
+# DAN>> in some kind of limit of large amounts of data, and under ideal conditions. 
+# DAN>> In practical scenarios, they can differ, as you have observed. When comparing
+# DAN>> methods head to head, you should always use the same method for all of them
+# DAN>> to assess accuracy, that's why we keep re-doing the x-val.
 
 # cross validation as before
 err_bagging<- NA
@@ -338,6 +362,8 @@ mean(err_rf)
 
 # give ada boost a try
 library(adabag)
+#CLAUDE>> THINK: Day 6 asks you to try a few settings and let CV decide, e.g. maxdepth = 1 or 3 here,
+#CLAUDE>> or max_depth and learning_rate for xgboost below.
 ada_mod <- adabag::boosting(sex~.,data=train_set,control=rpart.control(maxdepth=2))
 ada_pred<-predict(ada_mod,train_set[,2:dim(train_set)[2]])$class #note the prediction output gives 
 #more detail, including information on certainty
@@ -428,6 +454,9 @@ for (currentgroup in 1:numgp) {
   #get predictions for the left out group and get error rates
   pred_xgb_s<-predict(m_xgb_s,x_matrix[gp==currentgroup,])
   # 3 column matrix to check prob / performance - cant be 0.5 cuz not sure about the balance of variables in the train / test set
+  #CLAUDE>> ISSUE: a CV error of 0.660 is chance for 3 classes, and your confusion matrix below is nearly
+  #CLAUDE>> uniform. Recent xgboost already returns an n x 3 matrix from predict(), so this reshape scrambles
+  #CLAUDE>> it. I may be wrong about your version, but try max.col() on the predict() output directly.
   pred_xgb_s <- matrix(pred_xgb_s, ncol = 3,byrow = TRUE)
   # Select class with highest probability
   predictions_s <- max.col(pred_xgb_s) - 1
@@ -490,6 +519,8 @@ mean(err_xgb)
 
 # use random forest on test set 
 print("random forest on test set")
+#CLAUDE>> GOOD: one model (lowest CV error), fit on all of train_set, scored on the test set once.
+#CLAUDE>> That is the Day-7 procedure.
 testpred_rf<-predict(rf_mod,test_set[,2:9],type="class")
 sum(testpred_rf!=test_set$sex)/dim(test_set)[1]
 
