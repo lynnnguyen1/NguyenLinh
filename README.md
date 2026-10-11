@@ -44,3 +44,9 @@ Table 1: Summary of models error rates
 | XGBoost     | 0.6596508  |
 
 With error rate on test set is slightly lower than on train set, it means that there is low chance that our trained random forest model was overfitting or performing random guess (accuracy not 0.5). Biologically speaking, if we just based on morphologies of abalone as a marker and fit a random forest model to predict its sex (male, female or intersex), our model will predict wrong ~43% of the time, which is not really bad but also not really good. It can be because of the intersex classification (I), which was used when they got an infant abalone and not sure its sex yet, so maybe removing I class can help with prediction.  
+
+## Unit 4 - Modularity 
+
+- Practice writing function and structuring code / comments
+- Examine temperature and precipitation records of different locations in USA from 1950 to 2008 to observe trends over time using linear regression
+- Main code is at main.R, write up is at writeup.md 
