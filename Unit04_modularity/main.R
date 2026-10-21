@@ -1,9 +1,14 @@
+#CLAUDE>> Lines tagged "#CLAUDE>>" were written by Claude (an AI); lines tagged
+#CLAUDE>> "#DAN>>" were written by Dan. These are learning suggestions only.
 # analyzing climatic data (mostly temperature adn precipitation) - check its trend over years 1950 - 2008
 ## initialization
 library(ggplot2)
 library(dplyr)
 library(maps)
 
+#CLAUDE>> THINK: understanding the data before coding is lesson 5 (plan first) more than lesson 2.
+#CLAUDE>> Extensibility is answered by a question: what would a third climate variable cost you?
+#CLAUDE>> Here, two more function calls at the bottom. That is the evidence that this design is extensible.
 #MODULARITY EXAMPLE 2 - Get the general idea of the data structure and 
 # brainstorm the assignment and what to do to solve issue before actually start coding 
 
@@ -52,6 +57,8 @@ slope_trend <- function (data){
 # loop thru slope_trend with control on data to examine
 # check quantify the slope of climatic changes over years
 
+#CLAUDE>> NOTE: these two start "#MODULARITY 4" and "#MODULARITY 6" rather than "#MODULARITY EXAMPLE -",
+#CLAUDE>> so a search for the phrase the assignment specified misses them. The content is fine.
 #MODULARITY 4 - get the different parameters and how it explains the function
 #MODULARITY 6 - I had some scratch / draft code before putting them together in functions 
 
@@ -63,6 +70,10 @@ slope_trend <- function (data){
 main_func <- function(data, min_obs) {
     # unique of location (based on the 'name' column)
     # we examine different locations, each by each 
+    #CLAUDE>> ISSUE: a location is identified by name alone here. Station names repeat across states (there
+    #CLAUDE>> are several FAIRFIELDs, for example), so data[data$name == loc, ] pools stations from different
+    #CLAUDE>> states into one regression, plotted at the first one's coordinates. Grouping by state AND name,
+    #CLAUDE>> or by lon and lat, keeps them apart. This is also why your station counts differ from Dan's.
     locations <- unique(data$name)
 
     # make a dataset to store slopes at that location
@@ -74,6 +85,8 @@ main_func <- function(data, min_obs) {
         data2 <- data[data$name == loc, ]
 
         # count observations
+        #CLAUDE>> GOOD: because the NA rows were dropped at the top, nrow(data2) counts real measurements,
+        #CLAUDE>> which is what "at least 40 measurements" means.
         n_data <- nrow(data2)
         # check if there are enough observations (40 obs or more)
         if (n_data < min_obs) {
@@ -85,6 +98,9 @@ main_func <- function(data, min_obs) {
         slopes <- slope_trend(data2)
 
         # store the slope in the dataframe
+        #CLAUDE>> STYLE: rbind inside the loop copies the whole data frame on every pass. It works at 3,000
+        #CLAUDE>> stations but is the slow pattern. The slides' popsim shows the alternative: make the full-size
+        #CLAUDE>> result first (res <- matrix(NA, ...)) and fill it by index.
         slopes_df <- rbind(slopes_df, data.frame(location = loc, slope = slopes, lat = data2$lat[1], lon = data2$lon[1]))
     }
     return(slopes_df) # return df
@@ -113,6 +129,8 @@ examine_slopes <- function(slopes, threshold){
 # inputs are the slope (dataframe of slope from main_func, the title of the plot and labels)
 # output is the plot 
 #MODULARITY EXAMPLE 1 - not hard-code labels and titles 
+#CLAUDE>> GOOD: png(), hist(), dev.off() is the same three lines for both variables, so one function with
+#CLAUDE>> the labels as arguments is the right call (lesson 7), and no title is typed as a constant (lesson 1).
 hist_draw_func <- function(slopes, title, xlab, ylab) {
   png(paste(title, ".png", sep = ""), width = 10, height = 6, units = "in", res = 300)
   hist(slopes, main = title, xlab = xlab, ylab = ylab)
@@ -131,6 +149,10 @@ map_draw_func <- function(data, title, xlab, ylab, threshold) {
   data$alpha_val <- ifelse(abs(data$slope) > threshold, 1, 0.3) # get different opacity for extreme values
 
   # initiate the plot
+  #CLAUDE>> THINK: map_draw_func uses `us`, which it never receives as an argument: it reaches out to the
+  #CLAUDE>> global workspace. The slides' ironclad rule is that a function touches only what is passed in
+  #CLAUDE>> or created inside it. If `us` were renamed above, this function would break with no hint at its
+  #CLAUDE>> definition. Pass it in, or build it inside.
   plt <- ggplot(us) +
     geom_polygon(aes(x = long, y = lat, group = group),fill = "white", colour = "black") +
     geom_point(data = data,aes(x = lon, y = lat, color = slope,alpha = alpha_val))+
@@ -144,6 +166,8 @@ map_draw_func <- function(data, title, xlab, ylab, threshold) {
 ## let's use our functions to examine temperature and precipitation variables 
 
 # get slopes
+#CLAUDE>> STYLE: 40 is typed twice here and 0.1 four times below. You named min_obs inside main_func
+#CLAUDE>> (lesson 1); the same idea applies at the call site: min_obs <- 40 and threshold <- 0.1, once, at the top.
 precipitation_slopes <- main_func(precipitation,40)
 temp_slopes <- main_func(temp,40)
 
