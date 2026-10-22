@@ -1,5 +1,5 @@
 # Data information
-I chose to work on regression problem on Bures et al 2024 supplemental data. I want to predict the range size of plant species based on its number of chromosome, genome size and climatic variables at where the species was found. 
+I chose to work on regression problem on [Bures et al 2024](https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.19544) supplemental data. I want to predict the range size of plant species based on its number of chromosome, genome size and climatic variables at where the species was found. 
 
 | Variable | Description |
 |---|---|
@@ -46,9 +46,9 @@ So I fine-tuned glmnet with more n_iter (from 5 to 10) and get the tuning grid. 
 # On test set 
 Using that tuning model as a final version on test set, the statistic of the final model on the test data is RMSE = 0.3430839 and R-squared = 0.6609148, which is slightly worse than the cross-validated value (RMSE = 0.3374579 += 0.01 and R-squared = 0.6708281). I'd happy that the model is not overfitting and the performance is still acceptable to me.
 
-add the plot of predicted vs observed values on test set: 
+Plot of predicted vs observed values on test set: 
 
-![test_glmnet_plot](test_glmnet_plot.png).
+![test_glmnet_plot](test_glmnet_plot.png)
 
 # Some thoughts
 
@@ -56,4 +56,4 @@ I also tried krlsPoly and gamboost but they took too long and problematic so cha
 
 One thing to note here is I kinda know another version of glm (or in this case we are considering glmnet), which is pgls, Phylogenetic Generalized Linear Model, since I was trying to correct for phylogeny when examining relationship, and ordinary least square obviously was not sufficient in that case. I guess the general idea of gls is doing generalized least squared where it use regularization matrix to factor in colinearity that linear regression only can't do, and our data have bioclimatic variables (some columns represent temperature and some for precipitation) and also genome size and number of chromosome, etc., so to me it makes sense why glm-related ones are good models in this case. I'm more curious why svmLinear2 and pcaNNet can not beat glmnet, because to me glm is more "basic" and sometimes can not handle extreme values pretty well such as in our latitude column, but their RMSE values are not that different anyway - might be because they are both linear models. 
 
-If I could fix the issue with the parallel thing when runnign it locally, I'd love to try the polynomial thing out again, as the original study actually detected the polynomial relationship. I guess that also explains why our models did not have RMSE low (~0.3 is not low to me though), since linear models as we had is not an optimal way to do it. But it's still interesting to know that it did not perform terribly. 
+If I could fix the issue with the parallel thing when running it locally, I'd love to try the polynomial thing out again, as the original study actually detected the polynomial relationship. I guess that also explains why our models did not have RMSE low (~0.3 is not low to me though), since linear models as we had is not an optimal way to do it. But it's still interesting to know that it did not perform terribly. 
