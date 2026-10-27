@@ -50,3 +50,13 @@ With error rate on test set is slightly lower than on train set, it means that t
 - Practice writing function and structuring code / comments
 - Examine temperature and precipitation records of different locations in USA from 1950 to 2008 to observe trends over time using linear regression
 - Main code is at main.R, write up is at writeup.md 
+
+## Unit 5 - Regression 
+- Main dataset is from [Bures et al 2024](https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.19544), with clean up for regression tasks.
+- Day 1: Examine regression tools. Tools were used to predict genome size based on other genetics and bioclimatic variables, and those tools are default and full trees, random forest and ordinary multiple linear regression 
+=> Random forest performed best after cross validation on train set, and reached RMSE of 0.44 on test set. 
+- Day 2: Predict range size based on other variables in that dataset. Tools are random forest and bagging, then day 3 consists of krlsPoly, pcaNNet and lars2. Lars2 performed the best with RMSE of 0.34. 
+- Data, cleaned version, code for day 1, 2, 3 and write up are in the Unit05 directory. 
+
+## Unit Workflow
+- Practice using Latex to write up results 

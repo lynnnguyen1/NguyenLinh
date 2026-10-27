@@ -9,11 +9,10 @@ library(rpart)
 library(rpart.plot)
 library(randomForest)
 library(ipred)
-library(adabag) 
-library(xgboost)
+# library(adabag) 
+# library(xgboost)
 
 # setwd("Unit05_RegressionEtc")
-
 
 # preprocess the data in preprocessing_data.R
 df <- read.csv("Bures24_genome_cleaned.csv") 
@@ -22,10 +21,10 @@ nrow(df) # might have to randomize to lower observation number
 
 # main goal: predict log10_2C_genome.size based on other traits / distribution records
 # Start our ML training 
-# so let us try to predict the genome size - log10_2C_genome.size
-colnames(df)
+# predict the genome size - log10_2C_genome.size
+# colnames(df)
 
-# there is a chance that log10_2C_genome.size and log10_mean_chromosome_size colinear, so perhaps remove it
+# there is a chance that log10_2C_genome.size and log10_mean_chromosome_size colinear, so perhaps remove one
 df <- df %>%
   select(-log10_mean_chromosome_size)
 
@@ -34,9 +33,10 @@ set.seed(123)
 df <- df[sample(x=dim(df)[1], size=4500,replace=FALSE),]
 
 # save a copy 
-write.csv(df,"data_day1.csv",row.names=FALSE)
+# write.csv(df,"data_day1.csv",row.names=FALSE)
 
-
+# in case we need updated version 
+df <- read.csv("data_day1.csv")
 
 # just in case have NA there after numeric 
 df <- na.omit(df) 
@@ -92,8 +92,7 @@ default_r2
 # > default_rmse
 # [1] 0.4399302 - moderate rmse 
 # > default_r2
-# [1] 0.2861137 - not very high explanation power 
-
+# [1] 0.2861137 
 
 # Plot predicted against observed values also get the 45 degree line
 check_default <- data.frame(observed=train_set$log10_2C_genome.size, # our observed
