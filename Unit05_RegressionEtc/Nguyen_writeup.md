@@ -26,34 +26,36 @@ I chose to work on regression problem on [Bures et al 2024](https://nph.onlineli
 | `Mean.UVB5` | UV in general (not really sure tho) |
 
 # Models and their performance on training set
-Models that I tried are random forest and bagging, and new models are pcaNNet, glmnet, and svmLinear2, quantified performance using RMSE (Root Mean Square Error) and the stats of that statistic across folds is also reported in the table below.
+Models that I tried are random forest and bagging, and new models are pcaNNet, krlsPoly, and lars2, quantified performance using RMSE (Root Mean Square Error) and the stats of that statistic across folds is also reported in the table below.
 
 | Model | RMSE | RMSE SD | R-squared |
 |---|---:|---:|---:|
+| lars2 | 0.3376186 | 0.010093306 | 0.6705192 |
 | pcaNNet | 0.3977564 | 0.005188752 | 0.6742124 |
-| glmnet | 0.3374579 | 0.010255900 | 0.6708281 |
-| svmLinear2 | 0.3439794 | 0.011571164 | 0.6684044 |
+| krlsPoly | 0.5388771 | 0.009460121 | 0.5580677 |
 
-Cross-validation RMSE comparison: [view the plot](RangeSizeModelComparison.pdf). 
+Cross-validation RMSE comparison: ![RangeSizeModelComparison](RangeSizeModelComparison.png). 
 
-(should have saved that as png...)
+After training on train set with cross validation of 5 rounds, the best model is lars2 with the lowest RMSE. So I fine-tuned lars2 with the tuning grid with 25 steps to find the lowest RMSE until it starts increasing RMSE. The performance on more intensive tuning version does not improve, so perhaps we won't need to go further. 
 
+Distribution of RMSE after each step while tuning lars2 
+![rmse lars2](RMSE_dist_lars2.png)
 
-Best model is glmnet with the lowest RMSE, marginally.
+The lowest step in tuning lars2 is step 23, which is marginally lower than step 22 and 24 with RMSE of 0.338 +- 0.01. Interestingly, this RMSE is not improved compared to intial train set, which to me, might not worth the effort of tuning 25 steps. 
 
-So I fine-tuned glmnet with more n_iter (from 5 to 10) and get the tuning grid. The performance on more intensive tuning version does not improve, so perhaps we won't need to go further. 
 
 # On test set 
-Using that tuning model as a final version on test set, the statistic of the final model on the test data is RMSE = 0.3430839 and R-squared = 0.6609148, which is slightly worse than the cross-validated value (RMSE = 0.3374579 += 0.01 and R-squared = 0.6708281). I'd happy that the model is not overfitting and the performance is still acceptable to me.
+Using that tuning model as a final version on test set, the statistic of the final model on the test data is RMSE = 0.3430481 and R-squared = 0.661, which is slightly worse than the cross-validated value. We expect this scenario, and with the RMSE did not get too bad, I'm happy with the this model.
 
 Plot of predicted vs observed values on test set: 
 
-![test_glmnet_plot](test_glmnet_plot.png)
+![test_lars2_plot](test_lars2_plot.png)
 
 # Some thoughts
 
-I also tried krlsPoly and gamboost but they took too long and problematic so changed. 
+I also tried gamboost but it took too long and problematic so I did not report here. Also, krlsPoly actually will take a lot of CPU and time to run, and I could not make the parallel process work locally on my laptop. 
 
-One thing to note here is I kinda know another version of glm (or in this case we are considering glmnet), which is pgls, Phylogenetic Generalized Linear Model, since I was trying to correct for phylogeny when examining relationship, and ordinary least square obviously was not sufficient in that case. I guess the general idea of gls is doing generalized least squared where it use regularization matrix to factor in colinearity that linear regression only can't do, and our data have bioclimatic variables (some columns represent temperature and some for precipitation) and also genome size and number of chromosome, etc., so to me it makes sense why glm-related ones are good models in this case. I'm more curious why svmLinear2 and pcaNNet can not beat glmnet, because to me glm is more "basic" and sometimes can not handle extreme values pretty well such as in our latitude column, but their RMSE values are not that different anyway - might be because they are both linear models. 
+Our best model is lars2 (Least Angle Regression), so I read more about it to know how it actually works and why it outperforms other methods. It's a regression model that used to identify predictors that are important to the range size by adjusting its coefficient after each step. 
 
-If I could fix the issue with the parallel thing when running it locally, I'd love to try the polynomial thing out again, as the original study actually detected the polynomial relationship. I guess that also explains why our models did not have RMSE low (~0.3 is not low to me though), since linear models as we had is not an optimal way to do it. But it's still interesting to know that it did not perform terribly. 
+It was unexpected to me that lars2 works best. The original study detected the polynomial relationship between genome size and some bioclimatic variables, as well as negative linear relationship between genome size and range size, so I hypothesized that range size would have polynomial relationship with climates and krlsPoly would perform best here. However, it turns out lars2, which is a linear model, did better. One explanation can be because of multicollinearity of climatic variables, that temperature, precipitation and growing season length might have influences on each other, so krlsPoly and pcaNNet might be too detailed and the data itself did not harbor that much "good" information to learn from. However, for lars2, since it just focused on important variables, perhaps it can reduce error from noise better than the rest.  
+
