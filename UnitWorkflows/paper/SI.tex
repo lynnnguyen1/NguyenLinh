@@ -1,0 +1,78 @@
+\documentclass[letterpaper,11pt]{article}
+
+
+%packages - these add different functionality, and there are many more
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[left=2cm,top=2cm,right=2cm,bottom=1.5cm,head=.5cm,foot=.5cm]{geometry}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{authblk}
+\usepackage{xr}
+\usepackage{relsize}
+\usepackage{tikz}
+
+%\input{../paper/writeup.tex}
+
+
+%header material for paper delineated below but not actually run until \maketitle in the main document body
+\title{Supplemental material for "Genome size as a prediction of plant adaptation across environments" paper}
+\date{}
+
+\author[a,*]{Linh Nguyen}
+\author[a]{Daniel C. Reuman}
+
+\affil[a]{Department of Ecology and Evolutionary Biology and Center for Ecological Research, University of Kansas}
+\affil[*]{Corresponding author, l233n428@ku.edu}
+
+%This starts the actual body of the paper
+\begin{document}
+
+%adds linenumbers, good for submitting papers
+\linenumbers
+
+%actually creates the title, affiliations, etc in pdf
+\maketitle
+
+\tableofcontents
+
+\section{Main result reiterated}\label{SIsect:reiter}
+Bioclimatic variables were recorded using GBIF dataset, based on location of collected species. 
+
+\begin{table}[ht] 
+    \centering 
+    \caption{Description of bioclimatic variables} 
+    \label{tab:variables} 
+    \begin{tabular}{p{4.5cm} p{9cm}} 
+        \textbf{Variable} & \textbf{Description} \\ 
+        \texttt{log10\_range\_size} & Log$_{10}$-transformed geographic range size (response variable) \\ 
+        \texttt{log10\_2C\_genome.size} & Log$_{10}$-transformed 2C genome size \\ 
+        \texttt{num\_chr2n} & Diploid chromosome number \\ 
+        \texttt{Latitude} & Latitude \\ 
+        \texttt{Growth\_form} & Plant growth form \\ 
+        \texttt{log10\_occurence} & Log$_{10}$-transformed occurrence \\ 
+        \texttt{Longitude} & Longitude \\ 
+        \texttt{Mean.aridity.index} & Mean aridity index \\ 
+        \texttt{Mean.BIO1} & Mean annual temperature \\ 
+        \texttt{Mean.BIO3} & Isothermality \\ 
+        \texttt{Mean.BIO7} & Annual temperature range \\ 
+        \texttt{Mean.BIO12} & Annual precipitation \\ 
+        \texttt{Mean.BIO15} & Precipitation seasonality \\ 
+        \texttt{Mean.BIO19} & Precipitation of the coldest quarter \\ 
+        \texttt{Mean.GSL} & Growing season length \\ 
+        \texttt{Mean.GST} & Temperature during the growing season \\ 
+        \texttt{Mean.NGD5} & Number of days with temperature $> 5^\circ$C \\ 
+        \texttt{Mean.UVB1} & Annual ultraviolet-B radiation \\ 
+        \texttt{Mean.UVB3} & Mean UV-B radiation of the highest month \\ 
+        \texttt{Mean.UVB5} & Sum of monthly mean UV-B radiation \\ 
+    \end{tabular} 
+\end{table}
+
+\end{document}

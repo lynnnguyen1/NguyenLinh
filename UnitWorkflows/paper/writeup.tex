@@ -1,0 +1,95 @@
+\documentclass[letterpaper,11pt]{article}
+
+
+%packages - these add different functionality, and there are many more
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[left=2cm,top=2cm,right=2cm,bottom=1.5cm,head=.5cm,foot=.5cm]{geometry}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{authblk}
+\usepackage{xr}
+\usepackage{relsize}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+%\input{../paper/writeup.tex}
+\externaldocument[SI-]{SI}
+\input{../results/NumericResults.tex}
+
+%header material for paper delineated below but not actually run until \maketitle in the main document body
+\title{Genome size as a prediction of plant adaptation across environments}
+\date{}
+
+\author[a,*]{Linh Nguyen}
+\author[a]{Daniel C. Reuman}
+
+\affil[a]{Department of Ecology and Evolutionary Biology and Center for Ecological Research, University of Kansas}
+\affil[*]{Corresponding author, l233n428@ku.edu}
+
+%This starts the actual body of the paper
+\begin{document}
+
+%adds linenumbers, good for submitting papers
+\linenumbers
+
+%actually creates the title, affiliations, etc in pdf
+\maketitle
+
+% get abstract
+\begin{abstract}
+\noindent Genome size is an important factor of evolutionary since it relies on how chromosomes
+will eventually fold and express, and then to its genotypes and phenotypes. 
+It has been debated with multiple hypotheses to explain genome size variation,
+from the influence from evolutionary history to environments and adaptation. 
+
+\noindent In this assignment, I examined genome size using lars2 to investigate factors 
+that contribute to its variation and if they harbor linear relationship
+to genome size or not.
+\end{abstract}
+
+\section{Introduction}\label{section:introduction}
+Genome size has been an important factor of genome. Angiosperm species exhibit a wide range of variation in genome size
+that many hypotheses have been proposed to explain the variation. 
+
+\section{Methods}\label{section:methods}
+We use lars2 package from caret to examine relationship between genome size and other factors.
+
+We proposed a model of genome size, that genome size is explainable through range size and bioclimatic variables
+\[ \log_{10}(\text{Genome size}) \sim \log_{10}(\text{Range size}) + \text{number of chromosome} + \text{Bioclimatic variables} \]
+
+Here, Genome size is the genome size of species recorded in this dataset and the response variable that we are interested in.
+Range size is the range size of species recorded, number of chromosome is the number of chromosome of that speices, 
+and Bioclimatic variables are reported in SI. 
+
+See SI section \ref{SI-SIsect:reiter} for more details on bioclimatic variables.
+
+
+
+\section{Results}\label{section:results}
+
+On the training set, lars2 had an RMSE of $\rmsetrain$ and an $R^2$ of \rsquaretrain.
+Then, we tunned the trained model with more steps at it did not improve the performance with 
+RMSE of $\rmsetune$ and an $R^2$ of \rsquaretune. 
+Hence, we used intial model to test on test set.
+On the test set, it had an RMSE of $\rmsetest$ and an $R^2$ of \rsquaretest.
+
+The tuning graph of tuning process is reported here:
+\begin{figure}
+%This part brings the pdf figure in
+\centering
+\includegraphics[width=0.6\textwidth]{../results/RMSE_dist_lars2.pdf}
+%The caption. Note the numeric result can be used here too.
+\caption{Tuning steps of lars2 and corresponding RMSE of each step}
+\end{figure}
+
+
+
+\end{document}
