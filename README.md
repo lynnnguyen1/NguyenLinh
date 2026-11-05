@@ -60,3 +60,4 @@ With error rate on test set is slightly lower than on train set, it means that t
 
 ## Unit Workflow
 - Practice using Latex to write up results 
+- toy analysis only - lars2 on genome size prediction.
