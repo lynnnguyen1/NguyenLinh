@@ -32,7 +32,6 @@ I examined how to classify three different sexes of abalone (male (M), female (F
 
 Table 1: Summary of models error rates
 
-
 | Model       | Error Rate |
 |-------------|------------|
 | Full CART model  | 0.505125   |
@@ -61,3 +60,24 @@ With error rate on test set is slightly lower than on train set, it means that t
 ## Unit Workflow
 - Practice using Latex to write up results 
 - toy analysis only - lars2 on genome size prediction.
+
+## Unit NN 
+- Neural network assignment - focus on building neural network and CNN 
+- Simple dataset: MNIST handwritten digits (https://en.wikipedia.org/wiki/MNIST_database) 
+- Complex data to be reported: classify types of fungi based on microscopic images - https://archive.ics.uci.edu/dataset/773/defungi   
+
+One image of complex data that was segmented:
+
+![image](UnitNN/code/day01/H5_1a_2.jpg)
+
+- More info of analysis and results are coming
+
+## Final project
+- Idea writeup is in finproj/idea.md using dataset from https://arxiv.org/pdf/2302.14460v2 to predict pediatric appendicitis (appendicitis vs. no appendicitis) using machine learning methods
+- Apply both classification methods and neural network as we have both laboratory results and ultrasound images of patients
+- More info coming 
+
+
+## Note
+- Because of heavy dataset, raw images and some dense .csv files will not be uploaded on this github repo
+- All rights of materials in this course are to Linh Nguyen and Dan Reuman, as well as datasets are credited properly in each unit / assignment 

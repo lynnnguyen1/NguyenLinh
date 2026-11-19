@@ -1,0 +1,7 @@
+keras
+torch
+numpy
+matplotlib
+
+# pip3 install etc... 
+
